@@ -1,0 +1,120 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <vector>
+//#include "Mystring.h" when using class .cpp 
+//This code uses Disable 4996 for _crt_secure_no_warnings - Configuration Properties > C/C++ > Advanced property page > Disable Specific Warnings property added 4996.
+//Otherwise Visual Studio 2022, will not compile using strcpy.
+
+class Mystring {
+private:
+    char* str{};
+public:
+    Mystring();              //no arguements constructor
+    Mystring(const char* s); //overloaded constructor
+    Mystring(const Mystring& source); //copy constructor
+    Mystring(Mystring&& source); //move constructor
+    ~Mystring();
+
+    Mystring& operator=(const Mystring& rhs); //copy assignment
+    Mystring& operator=(Mystring&& rhs);      //move assignment
+
+    void display() const;
+ //   int get_length() const;
+ //   const char* get_str() const;
+
+};
+
+void Mystring::display() const {
+    std::cout << str << std::endl;
+}
+
+//no-args constructor
+Mystring::Mystring()
+    :str{ nullptr } {
+    str = new char[1];
+    *str = 'a';
+}
+
+//overloaded constructor
+Mystring::Mystring(const char* s)
+    :str{ nullptr } {
+    if (s == nullptr) {
+        str = new char[1];
+        *str = 'a';
+    } else {
+        str = new char[strlen(s) + 1];
+        strcpy(str, s);
+    }
+}
+
+//copy constrctor
+Mystring::Mystring(const Mystring& source)
+    :str{ nullptr } {
+    str = new char[strlen(source.str) + 1];
+    strcpy(str, source.str);
+}
+
+//move constructor
+Mystring::Mystring(Mystring &&source) 
+    : str (source.str) {
+    source.str = nullptr;
+    std::cout << "Move constructor used." << std::endl;
+}
+
+//copy assignment
+Mystring& Mystring::operator=(const Mystring& rhs) {
+    std::cout << "Using copy assignment." << std::endl;
+    if (this == &rhs)
+        return *this;
+    delete[] str;
+    str = new char[strlen(rhs.str) + 1];
+    strcpy(str, rhs.str);
+    return *this;
+}
+
+//move assignment
+Mystring& Mystring::operator=(Mystring&& rhs) {
+    std::cout << "Using move assignment." << std::endl;
+    if (this == &rhs)
+        return *this;
+    delete[] str;
+    str = rhs.str;
+    rhs.str = nullptr;
+    return *this;
+}
+
+//destructor
+Mystring::~Mystring() {
+    if (str == nullptr) {
+        std::cout << "Calling destructor for Mystring : nullptr" << std::endl;
+    }
+    else {
+        std::cout << "Calling destructor for Mystring : " << str << std::endl;
+    }
+    delete[] str;
+}
+
+int main()
+{
+    Mystring a{ "Hello" };  //overloaded constructor
+    a = Mystring{ "Hola" }; //overloaded constructor then move assignment
+    a = "Bonjour";          //overloaded constructor then move assignment 
+    Mystring b{ "Hello" };  //overloaded constructor
+    Mystring c;             //no args constructor
+    b = c;                  //copy assignment, b.operator=(a)
+    c = "This is a test of the copy assignement.";
+    Mystring empty;             //no args constructor
+    Mystring jenny{ "Jenny" };  //overloaded constructor
+    Mystring name{ jenny };     //copy constructor
+    Mystring names;             //no-args constructor
+    empty = name;               //copy assignment operator, name is an l-value
+    empty = "person 1";         //move assignement operator, /"person 1" is an r-value
+    empty.display();
+    jenny.display();
+    name.display();
+    names.display();
+    names = "Jenny, Elizabeth, Gabriel";
+    names.display();
+    return 0;
+}
